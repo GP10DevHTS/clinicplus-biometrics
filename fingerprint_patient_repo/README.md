@@ -18,8 +18,8 @@ This folder contains a standalone Python project that:
 - DigitalPersona runtime/driver installed and scanner visible in Device Manager (Windows) or equivalent OS tooling
 
 > **Important**
-> This project currently includes a **mock scanner reader** (`input()` in terminal).
-> To use a real DigitalPersona scanner, replace the body of `read_fingerprint_from_sensor()` in `main.py` with your SDK integration.
+> `main.py` now contains a concrete DigitalPersona U.are.U SDK capture implementation via `ctypes` and `dpfpdd.dll`.
+> For local testing without hardware, set `CP_FP_MOCK_DATA` to bypass scanner capture.
 
 ---
 
@@ -65,20 +65,20 @@ Make sure ClinicPlus has routes/pages that accept:
 DigitalPersona SDKs vary by OS/version and are often distributed with vendor docs. Use this integration pattern:
 
 1. Install the DigitalPersona SDK/runtime and verify scanner capture works with vendor sample tools.
-2. In `main.py`, replace `read_fingerprint_from_sensor()` with real scanner capture code.
-3. Return a stable fingerprint template string/bytes representation from SDK capture.
-4. Keep hashing enabled in `FingerprintRegistry` (already SHA-256) so raw templates are not stored directly.
+2. Confirm `dpfpdd.dll` is accessible from PATH (or same directory as the Python process).
+3. `main.py` calls the SDK functions `dpfpdd_init`, `dpfpdd_query_devices`, `dpfpdd_open`, and `dpfpdd_capture` to capture one sample.
+4. Captured bytes are base64 encoded and then hashed by `FingerprintRegistry` (SHA-256) before storage.
 5. Run the script and validate:
    - first scan routes to `/new-patient`
    - repeat scan routes to `/existing-patient?patient_code=...`
 
 ### Suggested function contract
 
-`read_fingerprint_from_sensor()` should:
+`read_fingerprint_from_sensor()` behavior in this project:
 
-- block until a valid scan is captured,
-- throw/raise a clear error on timeout or hardware failure,
-- return a deterministic string for the same fingerprint template.
+- uses `CP_FP_MOCK_DATA` when present (useful for local/dev testing),
+- otherwise performs a real scanner capture through DigitalPersona SDK,
+- raises explicit runtime errors when reader/runtime is unavailable.
 
 ---
 

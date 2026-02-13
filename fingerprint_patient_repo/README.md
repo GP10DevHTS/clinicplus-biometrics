@@ -108,3 +108,36 @@ python3 -m pytest -q
   - audit logging,
   - retention/deletion policies,
   - legal/compliance review (HIPAA/local biometric laws as applicable).
+
+
+## 8) C++ Version (DigitalPersona/WBF)
+
+A C++ implementation is now available at `fingerprint_patient_repo/cpp/main.cpp`.
+It follows the same routing flow as the Python app and uses the same SDK pattern from the DigitalPersona guide:
+
+- `WinBio*` API path for WBF-compatible readers (`--backend wbf`)
+- `dpfpdd.dll` path for DigitalPersona U.are.U SDK readers (`--backend dpfpdd`)
+- `auto` mode tries WBF first and falls back to `dpfpdd`
+
+### Build
+
+```bash
+cd fingerprint_patient_repo/cpp
+cmake -S . -B build
+cmake --build build
+```
+
+### Run
+
+```bash
+# For hardware capture on Windows (with drivers/runtime)
+./build/fingerprint_router --base-url http://localhost:3000 --db ./data/fingerprints_cpp.tsv --backend auto
+
+# For local testing without scanner
+CP_FP_MOCK_DATA=test-fingerprint ./build/fingerprint_router --base-url http://localhost:3000
+```
+
+Notes:
+- The C++ version currently persists hash->patient mappings in a TSV file (`fingerprints_cpp.tsv`).
+- On non-Windows platforms, fingerprint capture is not implemented; use `CP_FP_MOCK_DATA` for dry runs.
+

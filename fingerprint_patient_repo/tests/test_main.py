@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from main import FingerprintRegistry, MatchResult, build_redirect_url
+from main import FingerprintRegistry, MatchResult, build_redirect_url, read_fingerprint_from_sensor
 
 
 def test_new_fingerprint_routes_to_new_patient(tmp_path: Path) -> None:
@@ -24,3 +24,8 @@ def test_existing_fingerprint_routes_with_code(tmp_path: Path) -> None:
         build_redirect_url("http://localhost:3000/", existing)
         == "http://localhost:3000/existing-patient?patient_code=PAT00001"
     )
+
+
+def test_read_fingerprint_from_sensor_uses_mock_env(monkeypatch) -> None:
+    monkeypatch.setenv("CP_FP_MOCK_DATA", "digitalpersona-template")
+    assert read_fingerprint_from_sensor() == "digitalpersona-template"

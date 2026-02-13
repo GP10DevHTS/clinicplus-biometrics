@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 from main import FingerprintRegistry, MatchResult, build_redirect_url, read_fingerprint_from_sensor
 
@@ -26,6 +27,15 @@ def test_existing_fingerprint_routes_with_code(tmp_path: Path) -> None:
     )
 
 
-def test_read_fingerprint_from_sensor_uses_mock_env(monkeypatch) -> None:
-    monkeypatch.setenv("CP_FP_MOCK_DATA", "digitalpersona-template")
-    assert read_fingerprint_from_sensor() == "digitalpersona-template"
+def test_read_fingerprint_from_sensor_returns_capture_data() -> None:
+    """When the WBF backend is mocked to return data, read_fingerprint_from_sensor returns it."""
+    with patch("main._read_fingerprint_wbf", return_value="base64fingerprintdata"):
+        assert read_fingerprint_from_sensor() == "base64fingerprintdata"
+
+
+def test_read_fingerprint_from_sensor_falls_back_to_dpfpdd_when_wbf_fails(monkeypatch) -> None:
+    """When backend is auto and WBF fails, dpfpdd is used."""
+    monkeypatch.setenv("CP_FP_BACKEND", "auto")
+    with patch("main._read_fingerprint_wbf", side_effect=RuntimeError("No WBF reader")):
+        with patch("main._read_digitalpersona_uareu_fingerprint", return_value="dpfpdd-data"):
+            assert read_fingerprint_from_sensor() == "dpfpdd-data"

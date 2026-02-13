@@ -13,7 +13,7 @@ This folder contains a standalone Python project that:
 ## 1) Prerequisites
 
 - Python 3.10+
-- A running ClinicPlus web app (for example on `http://localhost:3000`)
+- A running ClinicPlus web app (for example on `http://localhost:8000`)
 - A DigitalPersona fingerprint scanner connected to the machine
 - DigitalPersona runtime/driver installed and scanner visible in Device Manager (Windows) or equivalent OS tooling
 
@@ -39,19 +39,19 @@ python3 -m pip install -r requirements-dev.txt
 
 The script accepts two runtime options:
 
-- `--base-url`: ClinicPlus app base URL (default: `http://localhost:3000`)
+- `--base-url`: ClinicPlus app base URL (default: `http://localhost:8000`)
 - `--db`: local fingerprint registry JSON file (default: `./data/fingerprints.json`)
 
 Example:
 
 ```bash
-python3 main.py --base-url http://localhost:3000 --db ./data/fingerprints.json
+python3 main.py --base-url http://localhost:8000 --db ./data/fingerprints.json
 ```
 
 Routing behavior:
 
-- New fingerprint: opens `http://localhost:3000/new-patient`
-- Existing fingerprint: opens `http://localhost:3000/existing-patient?patient_code=PATxxxxx`
+- New fingerprint: opens `http://localhost:8000/new-patient`
+- Existing fingerprint: opens `http://localhost:8000/existing-patient?patient_code=PATxxxxx`
 
 Make sure ClinicPlus has routes/pages that accept:
 
